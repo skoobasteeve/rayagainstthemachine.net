@@ -94,14 +94,20 @@ analytics:
 # Site Author
 author:
   name             : "Ray Lyon"
-  avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  avatar           : "/assets/images/avatar.jpg"
   bio              : "I am an **amazing** person."
   location         : "New York, NY"
   email            :
   links:
+    - label: "E201 06CB 86FE 0B4D"
+      icon: "fas fa-fingerprint"
+      url: "https://keybase.io/scubasteve/pgp_keys.asc?fingerprint=2dc3a1066bba7040fe7963d9e20106cb86fe0b4d"
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       url: "mailto:ray@raylyon.net"
+    - label: "Keybase"
+      icon: "fab fa-keybase"
+      url: "https://keybase.io/scubasteve"
     - label: "Website"
       icon: "fas fa-fw fa-link"
       # url: "https://your-website.com"
@@ -116,7 +122,7 @@ author:
       url: "https://github.com/skoobasteeve"
     - label: "Instagram"
       icon: "fab fa-fw fa-instagram"
-      # url: "https://instagram.com/"
+      # url: "https://instagram.com/theraylyon"
 
 # Site Footer
 footer:

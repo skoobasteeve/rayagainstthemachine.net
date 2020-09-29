@@ -21,7 +21,7 @@ title_separator          : "-"
 subtitle                 : "Breaking things so you don't have to."
 name                     : "Ray Lyon"
 description              : "Linux, self-hosting, and privacy."
-url                      : # "https://rayagainstthemachine.net"
+url                      : "https://rayagainstthemachine.net"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : "skoobasteeve/skoobasteeve.github.io.2"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
@@ -51,9 +51,9 @@ reCaptcha:
   secret                 :
 atom_feed:
   path                   : # blank (default) uses feed.xml
-search                   : # true, false (default)
-search_full_content      : # true, false (default)
-search_provider          : # lunr (default), algolia, google
+search                   : true
+search_full_content      : true
+search_provider          : lunr
 algolia:
   application_id         : # YOUR_APPLICATION_ID
   index_name             : # YOUR_INDEX_NAME
@@ -75,7 +75,7 @@ facebook:
   username               :
   app_id                 :
   publisher              :
-og_image                 : # Open Graph/Twitter default site image
+og_image                 : "/assets/images/avatar.jpg"
 # For specifying social profiles
 # - https://developers.google.com/structured-data/customize/social-profiles
 social:
@@ -215,7 +215,7 @@ sass:
 permalink: /:categories/:title/
 paginate: 5 # amount of posts to show
 paginate_path: /page:num/
-timezone: # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone: America/New_York
 
 
 # Plugins (previously gems:)
@@ -286,3 +286,4 @@ defaults:
       share: true
       related: true
       classes: wide
+      show_date: true

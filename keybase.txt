@@ -1,0 +1,70 @@
+==================================================================
+https://keybase.io/scubasteve
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://rayagainstthemachine.net
+  * I am scubasteve (https://keybase.io/scubasteve) on keybase.
+  * I have a public key with fingerprint 2DC3 A106 6BBA 7040 FE79  63D9 E201 06CB 86FE 0B4D
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "0101e41e47195eb3648d6749c082c9031f8430aa7754480489667f762175ba3dc14b0a",
+      "fingerprint": "2dc3a1066bba7040fe7963d9e20106cb86fe0b4d",
+      "host": "keybase.io",
+      "key_id": "e20106cb86fe0b4d",
+      "kid": "0101e41e47195eb3648d6749c082c9031f8430aa7754480489667f762175ba3dc14b0a",
+      "uid": "9590a31db610cd32597a24ad832c4719",
+      "username": "scubasteve"
+    },
+    "service": {
+      "hostname": "rayagainstthemachine.net",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "ctime": 1600466197,
+  "expire_in": 157680000,
+  "prev": "38d8c85ecab91b9bd8427dc43ed7628c85b815d3ced37b98bf182b825a5a67a0",
+  "seqno": 12,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+
+owGtUm1sFEUYvsO2tNQT4gdWRalLK0Lu6H5/lIRosPHrOCUFAorezczO3i2lu3e7
+e1fbiga1ChjSCigNBAJRq2gsjSASbW2R2B62jcWCUoNoLEJqRITqUdrkdLaBf/50
+Mslk3nme533eJ9Pku8GT7/3Fm9f7arZwibd3BHrCOHBHPQVNtZYqr6eq8OSB16rY
+dsJVukqVUzRDM5gnW2IUAUNO5GVVlHgF0TKLFJpjNJnnaAAkSeB5meZlRRQlTRJZ
+RhIg4FTE8JAGlJ/SdCOKrbilGw6RZVXEAYYWRQiBRPO0hiVF5FQFs6ShiKAsapiG
+vEqIMdN2GcQcBDZeoJukRi7hSXv/gf+ffScn5RRBoQHHqFBkaKRyrKBIgOWBKnMs
+clu4QBtbBqjGBG2jJPHq4BSm1vkpUk/pCLvRurNcw1igFkSBbtiOE8PVAMV0Ay8w
+sEOU4pbpmMhcS1Axx4nb5a6KUxt3aTUYhq8JhqFuqCRVwkhhy9ZNgypnCBI5utuB
+EWmaF0VGkfwUfi6uWzisuwhBEmWaLD8VjVs4RTQ5WZWRLGAEoMJABaoyz0oq4jms
+kkDcJygzgsohrHISVGSoMTILZVYAAhAlQFPujAnDJOIsMQqibgR61ABO0iIJTNvo
+PZDj8eZ77p55b07g6N68qs/iD2Rr0dD1r5g7xf2HnmkFM65X+JcL/3l+5It15/48
+W+psqvDNGi2akz3deftE6eYz5uUz32QCbQcPn1w0L2PvEbVnQw9vzUken+IcvFK5
+r+bCa5u3tSU+Em++6YfE8mCo4YOyPzJ5R9vf6ulpWeidemmjtm9gsOvW5m8Lt+5Y
+2vf+3FzuqfSa3GDHWOeS9bcULHyD/m24HzVE6tI/7+wpOfR34pW53UW33ZVY9F2b
+2RdfKtyzvfv3lz590rdqi7es+tHggwPL1qfKzntikdkzy3puDPV/7jn24bnmxmIn
+1JV84eL41JKPt3dnPM8MD0xfGbqP+aRw1eyan7IlkYS/VVndP3Qh9/XDB+aNbvk6
+nC6dX3+k89cvj8X2LH68S16xeGj3ed+VFxtg3eDFp/MjBXUnma9O5QXT/J0jpY+1
+9I9WCu/sP56p8NVxZtN71IYsVX9oecngeLqvvb31snb/2Hjx/sCGjuHWqx07L514
+qLnodEHs3d7B78/uOLEGPbGsseXNiezq3XzjrPlHrjZxK3ZNbBpxIi2nKop/fHuo
+MjgWeCT918p/AQ==
+=l1oJ
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/scubasteve
+
+==================================================================

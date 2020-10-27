@@ -21,7 +21,7 @@ If you're not familiar with Systemd unit files and how they work, I would highly
 
 You'll need to create dedicated folders on your machine where the shares will be mounted.
 
-``` bash
+```bash
 $ sudo mkdir -p /mnt/smb/sambashare
 $ sudo mkdir -p /mnt/nfs/nfsshare
 ```
@@ -30,7 +30,7 @@ $ sudo mkdir -p /mnt/nfs/nfsshare
 
 If your Samba server uses authentication, you'll need to create a file with your login details that Systemd can use to connect. These should be saved in a safe location with restricted permissions. 
 
-``` bash
+```bash
 $ sudo nano /etc/samba/smbcreds
 ```
 
@@ -39,7 +39,7 @@ username=[USERNAME]
 password=[PASSWORD]
 ```
 
-``` bash
+```bash
 $ sudo chmod 600 /etc/samba/smbcreds
 ```
 
@@ -47,13 +47,13 @@ $ sudo chmod 600 /etc/samba/smbcreds
 
 #### Samba
 
-``` bash
+```bash
 $ sudo apt install samba cifs-utils
 ```
 
 #### NFS
 
-``` bash
+```bash
 $ sudo apt install nfs-common
 ```
 
@@ -63,7 +63,7 @@ To make this work, we need (2) unit files for each connection: the **mount** uni
 
 The below instructions assume your samba share is located at `//example.server/sambafiles`.
 
-``` bash
+```bash
 $ sudo nano /etc/systemd/system/mnt-smb-sambashare.mount
 ```
 
@@ -86,13 +86,14 @@ WantedBy=multi-user.target
 ```
 
 A few notes on the above file:  
+
 * `vers=2.1` - adjust this based on the version of samba running on your server
 * `uid=1000` - adjust this based on your local user ID to avoid permissions problems. This is usually 1000 on a desktop system. 
 
 \
 Next we need to create the automount file in the same location.
 
-``` bash
+```bash
 $ sudo nano /etc/systemd/system/mnt-smb-sambashare.automount
 ```
 
@@ -113,7 +114,7 @@ WantedBy=multi-user.target
 
 The below instructions assume your NFS share is located at `example.server:/srv/nfsfiles`.
 
-``` bash
+```bash
 $ sudo nano /etc/systemd/system/mnt-nfs-nfssahre.mount
 ```
 
@@ -134,7 +135,7 @@ WantedBy=multi-user.target
 \
 Same as before, we need to create the automount file in the same location.
 
-``` bash
+```bash
 $ sudo nano /etc/systemd/system/mnt-smb-nfsshare.automount
 ```
 

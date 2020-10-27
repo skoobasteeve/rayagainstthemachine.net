@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "Better Nextcloud Photo Albums with Preview Generator and Exiftool"
-date:   2020-10-24 19:00:00
+date:   2020-10-27 18:00:00
 categories: [Linux Administration]
 tags: linux ubuntu nextcloud photos exiftool
 comments: true

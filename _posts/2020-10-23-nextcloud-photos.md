@@ -2,14 +2,19 @@
 layout: single
 title:  "Better Nextcloud Photo Albums with Preview Generator and Exiftool"
 date:   2020-10-27 18:00:00
+excerpt: "If you host and use a Nextcloud server, you know that it's good at many things. Unfortunately, displaying photos is not one of them."
 categories: [Linux Administration]
 tags: linux ubuntu nextcloud photos exiftool
 comments: true
 ---
 
-If you host and use a Nextcloud server, you know that it's good at many things. Unfortunately, photos are not one of its strengths. Since Nextcloud does not read photo metadata, your albums will often appear out-of-order. You may also notice that thumbnails and previews take a very long time to load and flipping quickly through a bunch of photos becomes a painful waiting game. 
+![nextcloud-photos-hero](/assets/images/screenshots/nextcloud-photos-hero.png){:class="img-responsive" .align-center} 
 
-The good news is that because Nextcloud is a wonderful piece of FOSS that we're self-hosting, we can make some modifications to smooth out these pain points. There are (2) pieces of software we'll be using to accomplish this:
+If you host and use a Nextcloud server, you know that it's good at many things. Unfortunately, displaying photos is not one of them. Since Nextcloud does not read photo metadata, your albums will often appear out-of-order. You may also notice that thumbnails and previews take a very long time to load and flipping quickly through a bunch of photos becomes a painful waiting game. 
+
+The good news is that because Nextcloud is a wonderful piece of FOSS that we're self-hosting, we can make some modifications to smooth out these pain points. 
+
+There are (2) pieces of software we'll be using to accomplish this:
 
 - [Preview Generator](https://apps.nextcloud.com/apps/previewgenerator) (Nextcloud app)
 - [exiftool](https://exiftool.org/) (Linux app)
@@ -24,9 +29,8 @@ First we need to fix Nextcloud's preview generation. By default, Nextcloud gener
 
 ![preview generator](/assets/images/screenshots/nextcloud-photos-01.jpg){:class="img-responsive" .align-center} 
 
-
 2. **Configure preview and thumbnail settings.** While the default settings work well from a performance standpoint, they cause Nextcloud to generate a huge number of previews and thumbnails for each photo. Once you add a lot of photos, you'll notice that these previews eat into your storage significantly (sometimes more than the photos themselves). Fortunately, Preview Generator is highly configurable.
-
+   
    SSH into your Nextcloud server and follow the instructions below.
    
    **Note:** I've found that the below settings provide a good balance of resolution, performance, and storage usage for my environment. You can tweak them depending on your needs.
@@ -41,10 +45,10 @@ First we need to fix Nextcloud's preview generation. By default, Nextcloud gener
    
    Next, edit your config.php to specify the maximum preview size for images. This is going to effect the appearance and load time of images when you click on them.
    
-   
    ```bash
    sudo nano /var/www/nextcloud/config/config.php
    ```
+   
    Find the below lines toward the end of the file. If they don't exist, add them to the block. 
    
    ```php
@@ -52,14 +56,13 @@ First we need to fix Nextcloud's preview generation. By default, Nextcloud gener
    'preview_max_y' => '2048',
    'jpeg_quality' => '60',
    ```
-  
+   
    Save the file and restart the web server.
    
    ```bash
    sudo service apache2 restart
    ```
-   
-   
+
 3. **Generate initial previews.** Open a terminal on your Nextcloud server and run the following command:
    
    ```bash
@@ -70,7 +73,6 @@ First we need to fix Nextcloud's preview generation. By default, Nextcloud gener
    
    **NOTE:** Depending on the amount of photos you have, this could take a while to complete and use a high amount of resources. If you have users beyond yourself, it's probably best to run it during a low-activity period. 
 
-   
 4. **Add a cron job.** This allows Preview Generator to run continuously generate previews as new photos are added to Nextcloud. To avoid permissions problems, we'll  edit the crontab of the web server user:
    
    ```bash

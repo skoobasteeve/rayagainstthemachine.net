@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "Painless On-Demand NAS Connections in Linux with Systemd Automount"
+title:  "On-Demand NFS and Samba Connections in Linux with Systemd Automount"
 date:   2020-10-07 19:00:00
 categories: [Linux Administration]
 tags: linux samba nas systemd ubuntu

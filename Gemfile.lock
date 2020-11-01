@@ -89,6 +89,7 @@ PLATFORMS
 
 DEPENDENCIES
   jekyll
+  jekyll-sitemap
   minimal-mistakes-jekyll
 
 BUNDLED WITH

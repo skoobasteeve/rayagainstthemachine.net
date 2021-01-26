@@ -89,11 +89,22 @@ First we need to fix Nextcloud's preview generation. By default, Nextcloud gener
 
 # Photo Sorting
 
+**UPDATE 2021-01-26:** Added methods to run the script on both client and server systems.
+{: .notice--info}
+
 Nextcloud is first and foremost a file sharing application, so it views files just as your file system would. This is great until you get to photo albums, where the EXIF metadata of the photo is more relevant to sorting than the filename or modified date. To be sure that all photos in Nextcloud display in chronological order, we need to get creative. 
 
-That's where the wonderful exiftool comes in. This powerful command-line application allows you to read and manipulate the EXIF data of a photo. The feature that solves our problem is the ability to read the original capture date of a photo and apply it to both the *last modified* attribute and the *filename*. This way, no matter how you sort the images in Nextcloud, they'll display in **chronological** order. 
+That's where the wonderful exiftool comes in. This powerful command-line application allows you to read and manipulate the EXIF data of a photo. The feature that solves our problem is the ability to read the original capture date of a photo and apply it to both the *last modified* attribute and the *filename*. This way, no matter how you sort the images in Nextcloud, they'll display in **chronological** order.
 
-To get started using exiftool, follow the instrutions below on one of your **Nextcloud clients.**
+You have **two options** for using exiftool:
+
+1. Run a script from a synced **client** computer.
+
+2. Run a script on the data directory on the **server**.
+
+The advantage of running it on the server is that you can automate periodic scans of your photos so they are always sorted properly and up-to-date. The disadvantage is that there are some extra steps involved that may take a long time depending on the speed of your server. 
+
+To get started using exiftool, follow the instructions below on one of your **Nextcloud clients.**
 
 ### Write the script
 
@@ -109,16 +120,52 @@ To get started using exiftool, follow the instrutions below on one of your **Nex
    sudo nano photo-cleanup.sh
    ```
    
+   **Option 1: Client Script:**
+   
    ```shell
    #!/bin/sh
    
    albumdir=$1
+   
+   # use below variables if running on the server
+   # nextclouddir="/var/www/nextcloud"
+   # user who owns the photos
+   # nextclouduser=""
    
    echo "Changing modified date to shot date..."
    exiftool "-filemodifydate<datetimeoriginal" -r "$albumdir"
    
    echo "Renaming files to shot date..."
    exiftool '-FileName<DateTimeOriginal' -r -d "%Y-%m-%d_%H.%M.%S%%-c.%%e" "$albumdir"
+   
+   # uncomment the below command if running on the server
+   # echo "Re-scanning your Nextcloud data directory..."
+   # sudo -u www-data php "$nextclouddir"/occ files:scan "$nextclouduser"
+   
+   exit 0
+   ```
+   
+   **Option 2: Server Script:**
+   
+   ```shell
+   #!/bin/sh
+   
+   albumdir=$1
+   
+   # use below variables if running on the server
+   nextclouddir="/var/www/nextcloud"
+   # user who owns the photos
+   nextclouduser=""
+   
+   echo "Changing modified date to shot date..."
+   exiftool "-filemodifydate<datetimeoriginal" -r "$albumdir"
+   
+   echo "Renaming files to shot date..."
+   exiftool '-FileName<DateTimeOriginal' -r -d "%Y-%m-%d_%H.%M.%S%%-c.%%e" "$albumdir"
+   
+   # uncomment the below command if running on the server
+   echo "Re-scanning your Nextcloud data directory..."
+   sudo -u www-data php "$nextclouddir"/occ files:scan "$nextclouduser"
    
    exit 0
    ```
@@ -130,6 +177,18 @@ To get started using exiftool, follow the instrutions below on one of your **Nex
    ```
    
    Sets your album directory as the first argument when you execute the script.  
+   
+   ```shell
+   nextclouddir="/var/www/nextcloud"
+   ```
+   
+   **Server script only**: set to your Nextcloud install folder. 
+   
+   ```shell
+   nextclouduser=""
+   ```
+   
+   **Server script only**: set to the Nextcloud user that owns the photo directory.
    
    ```shell
    exiftool "-filemodifydate<datetimeoriginal" -r "$albumdir"
@@ -144,6 +203,9 @@ To get started using exiftool, follow the instrutions below on one of your **Nex
    Similar to the previous command but applies `datetimeoriginal` to the filename. The `-d` flag specifies how the date and time data are laid out in the new filename. 
 
 ### Test the script
+
+**Warning:** If you're choosing to run the **server** script, keep in mind that the final files:scan command can take a long time to complete depending on the amount of photos and speed of your instance. It's best to run it during a scheduled maintenance window.
+{: .notice--warning}
 
 Let's test this simple script on a directory of photos. 
 
@@ -199,10 +261,18 @@ Just like that, our filenames and metadata are updated.
 
 You could run the script manually each time you add photos, but who has time for that? If you're frequently adding new photos and directories, you can automate it. 
 
-To do so, we'll add an entry to the crontab on the **client system.** Do this on a computer that has the photo albums synced with the Nextcloud client app.
+To do so, we'll add an entry to the crontab on the client or server.
+
+**Client (user crontab)**
 
 ```bash
 crontab -e
+```
+
+**Server (system crontab)**
+
+```shell
+sudo crontab -e
 ```
 
 ```shell

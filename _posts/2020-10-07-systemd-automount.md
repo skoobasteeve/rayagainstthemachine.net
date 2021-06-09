@@ -115,7 +115,7 @@ WantedBy=multi-user.target
 The below instructions assume your NFS share is located at `example.server:/srv/nfsfiles`.
 
 ```bash
-$ sudo nano /etc/systemd/system/mnt-nfs-nfssahre.mount
+$ sudo nano /etc/systemd/system/mnt-nfs-nfsshare.mount
 ```
 
 ```
@@ -136,7 +136,7 @@ WantedBy=multi-user.target
 Same as before, we need to create the automount file in the same location.
 
 ```bash
-$ sudo nano /etc/systemd/system/mnt-smb-nfsshare.automount
+$ sudo nano /etc/systemd/system/mnt-nfs-nfsshare.automount
 ```
 
 ```

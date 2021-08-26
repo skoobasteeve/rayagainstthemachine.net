@@ -112,7 +112,9 @@ WantedBy=multi-user.target
 
 #### NFS
 
-The below instructions assume your NFS share is located at `example.server:/srv/nfsfiles`.
+The below instructions assume your NFS share is located at `example.server:/srv/nfsfiles`.  
+
+***EDIT 2021-08-26*** Reader Denis suggested adding the `TimeoutSec` parameter to the below file to prevent lock-ups when the share isn't present on your local network. Thank you Denis for the contribution!
 
 ```bash
 $ sudo nano /etc/systemd/system/mnt-nfs-nfsshare.mount
@@ -127,6 +129,7 @@ What=example.server:/srv/nfsfiles
 Where=/mnt/nfs/nfsshare
 Type=nfs
 Options=defaults
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target

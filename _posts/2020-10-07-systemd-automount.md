@@ -93,6 +93,8 @@ A few notes on the above file:
 \
 Next we need to create the automount file in the same location.
 
+***EDIT 2021-08-26*** Reader flansuse pointed out that including `Requires=network-online.target` in the automount file did not conform with systemd guidelines. I confirmed that the mounts work perfectly well without that line, so it's been removed.
+
 ```bash
 $ sudo nano /etc/systemd/system/mnt-smb-sambashare.automount
 ```
@@ -100,7 +102,6 @@ $ sudo nano /etc/systemd/system/mnt-smb-sambashare.automount
 ```
 [Unit]
 Description=samba automount for yourfiles
-Requires=network-online.target
 
 [Automount]
 Where=/mnt/smb/sambashare
@@ -145,7 +146,6 @@ $ sudo nano /etc/systemd/system/mnt-nfs-nfsshare.automount
 ```
 [Unit]
 Description=nfs automount for nfsfiles
-Requires=network-online.target
 
 [Automount]
 Where=/mnt/nfs/nfsshare

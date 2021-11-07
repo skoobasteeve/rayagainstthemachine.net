@@ -2,6 +2,7 @@
 layout: single
 title:  "On-Demand NFS and Samba Connections in Linux with Systemd Automount"
 date:   2020-10-07 19:00:00
+last_modified_at: 2021-08-26
 categories: [Linux Administration]
 tags: linux samba nas systemd ubuntu
 comments: true

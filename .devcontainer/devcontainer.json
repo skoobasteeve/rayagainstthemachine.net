@@ -1,0 +1,16 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/jekyll:bookworm",
+  
+    "customizations": {
+      "vscode": {
+        "extensions": [
+            "albert.TabOut",
+            "ecmel.vscode-html-css",
+            "redhat.vscode-yaml",
+            "rebornix.Ruby"
+        ]
+      }
+    },
+  
+    "forwardPorts": [4000]
+  }

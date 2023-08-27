@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "Building a Reproducible Nextcloud Server, Part one: Choosing the stack"
-date:   2023-08-15 11:59:00
+date:   2023-08-27 10:00:00
 excerpt: "After successfully hosting a Nextcloud instance on the same VPS for 7 years, I decided to rebuild it from scratch with modern tooling."
 categories: [Self-Hosting, Linux Administration]
 tags: linux nextcloud podman docker container vps

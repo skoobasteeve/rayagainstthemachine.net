@@ -180,6 +180,15 @@ podman run \
 docker.io/library/caddy
 ```
 
+#### Options explained
+
+* `--volume $HOME/.podman/nextcloud/nextcloud/config:/var/www/html:z` - Creates a bind mount in the folder you created for Nextcloud to store its configuration files. This is the content Caddy serves to the web, so it needs access.
+* `--volume $HOME/.podman/nextcloud/caddy/config/Caddyfile:/etc/caddy/Caddyfile:z` - Creates a bind mount for the CaddyFile.
+* `--volume $HOME/.podman/nextcloud/caddy/data:/data:z` - Creates a bind mount for Caddy's data folder.
+* `--name caddy` - Sets the name of the container.
+* `--pod nextcloud` - Attaches the container to the nextcloud pod we previously created.
+* `docker.io/library/caddy` - Container image we're going to download and run.
+
 Verify that all (3) containers are running with `podman ps`.
 
 ``` shell
@@ -237,4 +246,102 @@ Start the service corresponding to the pod.
 
 ``` shell
 systemctl --user start pod-nextcloud
+```
+
+`podman ps` should show that all your containers are running. If you have issues, you can troubleshoot the same way you would for another systemd service. 
+
+Check the status of the pod.
+
+``` shell
+systemctl --user status pod-nextcloud
+```
+
+Check the status of an individual container.
+
+``` shell
+systemctl --user status container-nextcloud-app
+```
+
+Check the service output for errors (note that you need `sudo` for this one).
+
+``` shell
+sudo journalctl -xe
+```
+
+## Moving to production
+
+Up until now we've been working with our containers on localhost, but now it's time to move them to a public facing server with a FQDN and public IP. This step in the process highlights one of the biggest selling points of containers; we can develop and configure locally, then push that exact working configuration to another server and it Just Works™. Beyond that, our systemd unit files save us the trouble of remembering the exact `podman` commands to run on the server, so we can simply copy the files and start the service. 
+
+To begin, let's do just that. Copy the `*.service` files from your computer to the public-facing server with a tool like `scp` or `rsync`. 
+
+``` shell
+scp $HOME/.config/systemd/user/*.service user@your.server.com:/home/user/
+```
+
+Then, on the **production server** recreate the folder structure you used locally.
+
+``` shell
+mkdir -p $HOME/.podman/nextcloud/nextcloud/config
+mkdir -p $HOME/.podman/nextcloud/nextcloud/data
+mkdir -p $HOME/.podman/nextcloud/caddy/config
+mkdir -p $HOME/.podman/nextcloud/caddy/data
+mkdir -p $HOME/.podman/nextcloud/mariadb
+```
+
+Also the systemd folder in case it's not there.
+
+``` shell
+mkdir -p $HOME/.config/systemd/user
+```
+
+Copy the service files into the systemd user directory and reload systemd.
+
+``` shell
+cp $HOME/*.service $HOME/.config/systemd/user/
+systemctl --user daemon-reload
+```
+
+### Caddyfile
+
+The Caddyfile we used earlier won't be suitable for production since it doesn't use an FQDN or HTTP(s). Create a new Caddyfile on the server in `$HOME/.podman/nextcloud/caddy/config/` with the below contents, replacing the domain with one you've set up for the server.
+
+``` hcl
+your.server.com {
+
+    root * /var/www/html
+    file_server
+    php_fastcgi nextcloud-app:9000 {
+        root /var/www/html
+        env front_controller_active true
+    }
+    
+    encode gzip
+
+    log {
+        output file /data/nextcloud-access.log
+    }
+
+    header {
+        Strict-Transport-Security "max-age=15768000;includeSubDomains;preload"
+    }
+
+    # .htaccess / data / config / ... shouldn't be accessible from outside
+	@forbidden {
+		path /.htaccess
+		path /data/*
+		path /config/*
+		path /db_structure
+		path /.xml
+		path /README
+		path /3rdparty/*
+		path /lib/*
+		path /templates/*
+		path /occ
+		path /console.php
+	}
+	respond @forbidden 404
+
+    redir /.well-known/carddav /remote.php/dav 301
+    redir /.well-known/caldav /remote.php/dav 301
+}
 ```

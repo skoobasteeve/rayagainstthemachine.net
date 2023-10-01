@@ -25,7 +25,7 @@ Podman "pods" are logical groupings of containers that depend on one another. Th
 **Rootless Gotcha #1**  
 In most Linux distributions, unprivileged applications are not allowed to bind themselves to ports below 1024. To fix:
 1. Run `sudo sysctl net.ipv4.ip_unprivileged_port_start=80`
-2. Create a file under `/etc/sysctl.d/` and add the line `net.ipv4.ip_unprivileged_port_start=80`. This makes the change permanent.
+2. Create a file under `/etc/sysctl.d/` called `podman` and add the line `net.ipv4.ip_unprivileged_port_start=80`. This makes the change permanent.
 
 Now, create a new pod called "nextcloud".
 
@@ -153,7 +153,7 @@ Before we start the Caddy container, we'll need to write a config in the form of
 
 Create file named `Caddyfile` in `$HOME/.podman/nextcloud/caddy/config/` and paste the below contents.
 
-``` hcl
+```
 http://localhost:80 {
 
     root * /var/www/html
@@ -303,9 +303,9 @@ systemctl --user daemon-reload
 
 ### Caddyfile
 
-The Caddyfile we used earlier won't be suitable for production since it doesn't use an FQDN or HTTP(s). Create a new Caddyfile on the server in `$HOME/.podman/nextcloud/caddy/config/` with the below contents, replacing the domain with one you've set up for the server.
+The Caddyfile we used earlier won't be suitable for production since it doesn't use an FQDN or HTTPS. Create a new Caddyfile on the server in `$HOME/.podman/nextcloud/caddy/config/` with the below contents, replacing the domain with one you've set up for the server.
 
-``` hcl
+```
 your.server.com {
 
     root * /var/www/html
@@ -345,3 +345,200 @@ your.server.com {
     redir /.well-known/caldav /remote.php/dav 301
 }
 ```
+
+The above configuration will use Caddy's built-in automatic HTTPS to pull a certificate from Let's Encrypt. It also blocks web access to certain directories in your Nextcloud folder and adds redirects for Nextcloud's CalDAV and CardDAV endpoints. 
+
+### Mariadb optimizations
+
+After running this setup in production and going through my first Nextcloud version upgrade, I was having issues with Nextcloud losing access to the database during the upgrade process. I did some research and found this [helpful article](https://docs.nextcloud.com/server/latest/admin_manual/configuration_database/linux_database_configuration.html) in Nextcloud's documentation which points to a few MariaDB options we can use to fix these issues.
+
+The MariaDB container allows us to pass any additional configuration options as command line arguments to the container run command. This makes it really easy to tweak our SystemD service file to enable the optimizations. 
+
+Open the `container-mariadb.service` file in a text editor and add the following arguments after `docker.io/library/mariadb:10` in the `ExecStart` block:
+
+``` systemd
+--transaction-isolation=READ-COMMITTED \
+--log-bin=binlog \
+--binlog-format=ROW \
+--max_allowed_packet=256000000
+```
+
+The `ExecStart` block should look something like this when you're done:
+
+``` systemd
+ExecStart=/usr/bin/podman run \
+	--cidfile=%t/%n.ctr-id \
+	--cgroups=no-conmon \
+	--rm \
+	--pod-id-file %t/pod-nextcloud-pod.pod-id \
+	--sdnotify=conmon \
+	--replace \
+	--detach \
+	--env MYSQL_DATABASE=nextcloud \
+	--env MYSQL_USER=nextcloud \
+	--env MYSQL_PASSWORD=nextcloud \
+	--env MYSQL_ROOT_PASSWORD=nextcloud \
+	--volume %h/.podman/nextcloud/mariadb:/var/lib/mysql:z \
+	--name mariadb docker.io/library/mariadb:10 \
+	--transaction-isolation=READ-COMMITTED \
+    --log-bin=binlog \
+    --binlog-format=ROW \
+	--max_allowed_packet=256000000
+```
+
+### Nextcloud maitenance cron job
+
+Nextcloud has an ongoing [background task](https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/background_jobs_configuration.html) that needs to run on a regular basis. There are number of ways to schedule this, but the recommend method is using the host cron. 
+
+Edit your **user** crontab by running `crontab -e` and add the following line:
+
+```
+*/5 * * * * podman exec -u 33 nextcloud-app php /var/www/html/cron.php
+```
+
+The command is opening a shell inside the `nextcloud-app` container and running Nextcloud's `cron.php` script every 5 minutes.
+
+### (Optional) Use an env file for systemd units
+
+Instead of pasting the database credentials and other secrets directly into the systemd unit files, we can use the `EnvironmentFile` parameter to dump those into a `.env` file with locked-down permissions. 
+
+Create the `.env` file somewhere on the system that makes sense. I recommend placing it in the `$HOME/.podman/nextcloud` directory and naming it `.nextcloud-env`. The syntax of the file should look like this:
+
+``` shell
+NEXTCLOUD_VERSION=27
+MYSQL_PASSWORD=SuperSecretPassword
+MYSQL_DATABASE=nextcloud
+MYSQL_USER=nextcloud
+MYSQL_ROOT_PASSWORD=EvenMoreSuperSecretPassword
+```
+
+Update the permissions of the file so that only your user can read it. Replace `youruser` in the below command with the user running your containers.
+
+``` shell
+chown youruser:youruser $HOME/.podman/nextcloud/.nextcloud-env
+chmod 0600 $HOME/.podman/nextcloud/.nextcloud-env
+```
+
+Update each of your systemd unit files that need to access the file with the `EnviornmentFile` parameter in the `[Service]` block:
+
+``` systemd
+EnvironmentFile=%h/.podman/nextcloud/.nextcloud-env
+```
+
+`%h` in systemd lingo is a variable for your home directory.
+
+Lastly, replace the values in your systemd unit files with `${VARIABLE_NAME}`. In the end your files will look something like this, using the `container-mariadb.service` file as an example:
+
+``` systemd
+[Unit]
+Description=Podman container-mariadb.service
+Documentation=man:podman-generate-systemd(1)
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=%t/containers
+BindsTo=pod-nextcloud-pod.service
+After=pod-nextcloud-pod.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%h/.podman/nextcloud/.nextcloud-env
+Restart=on-failure
+TimeoutStopSec=70
+ExecStartPre=/bin/rm -f %t/%n.ctr-id
+ExecStart=/usr/bin/podman run \
+	--cidfile=%t/%n.ctr-id \
+	--cgroups=no-conmon \
+	--rm \
+	--pod-id-file %t/pod-nextcloud-pod.pod-id \
+	--sdnotify=conmon \
+	--replace \
+	--detach \
+	--env MYSQL_DATABASE=${MYSQL_DATABASE} \
+	--env MYSQL_USER=${MYSQL_USER} \
+	--env MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+	--env MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} \
+	--volume %h/.podman/nextcloud/mariadb:/var/lib/mysql:z \
+	--name mariadb docker.io/library/mariadb:10 \
+	--transaction-isolation=READ-COMMITTED \
+    --log-bin=binlog \
+    --binlog-format=ROW \
+	--max_allowed_packet=256000000
+ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+Type=notify
+NotifyAccess=all
+
+[Install]
+WantedBy=default.target
+```
+
+### Start your service!
+
+At this point, everything should be in place for your Nextcloud production server. Make sure of the following:
+
+* A DNS A record exists pointing to the public IP address of your server
+* That domain matches the domain in your Caddyfile
+* The host firewall is allowing incoming ports `80` and `443`. This is usually `firewalld` on REHL-based systems and `UFW` on Debian-based.
+
+First, reload the systemd user daemon.
+
+``` shell
+systemctl --user daemon-reload
+```
+
+Enable the pod service so it starts on boot.
+
+``` shell
+systemctl --user enable pod-nextcloud
+```
+
+**Rootless gotcha #2**: enable lingering for your user. This allows non-root services to start at boot without a console login.
+
+``` shell
+loginctl enable-linger youruser
+```
+
+If you haven't done so already, make the change to update the unprvivileged ports that I referenced earlier in the post.
+
+``` shell
+sudo sysctl net.ipv4.ip_unprivileged_port_start=80`
+sudo echo "net.ipv4.ip_unprivileged_port_start=80" > /etc/sysctl.d/99-podman.conf
+```
+
+Finally, start the Nextcloud service!
+
+``` shell
+systemctl --user start pod-nextcloud
+```
+
+Verify everything is running with `podman ps`.
+
+``` shell
+CONTAINER ID  IMAGE                                    COMMAND               CREATED         STATUS         PORTS                                     NAMES
+f4a80daae64f  localhost/podman-pause:4.7.0-1695839078                        2 hours ago     Up 45 minutes  0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp  d1b78054d6f4-infra
+c5961a86a474  docker.io/library/mariadb:10             mariadbd              45 minutes ago  Up 45 minutes  0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp  mariadb
+13d5c43c0b4d  docker.io/library/nextcloud:27-fpm       php-fpm               26 minutes ago  Up 26 minutes  0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp  nextcloud-app
+b29486a99286  docker.io/library/caddy:latest           caddy run --confi...  4 minutes ago   Up 4 minutes   0.0.0.0:80->80/tcp, 0.0.0.0:443->443/tcp  caddy
+```
+
+At this point you should have rootless Nextcloud accessible at your FQDN on the public internet with HTTPS!
+
+## Troubleshooting
+
+If the Nextcloud page isn't loading as expected or you're getting an error when launching your service, the container output logs are your friends! Run `podman ps` to see if your containers are running. If they are, use `podman logs <container name>` to see the latest output from each container. It's usually pretty easy to spot red flags there.
+
+If the containers aren't running, use `sudo journalctl -xe` to check the output of each service. You may have to scroll up quite a bit to get useful information, since services will often try to restart multiple times after an error and fill up the output in process. Make sure you scroll up past the messages that say `service start request repeated too quickly` and try to find the first messages shown from each container's service.
+
+**Common problems**
+* Directory or file referenced in the .service file doesn't exist or is in the wrong location (your container directories and Caddyfile)
+* Caddy can't get the certificate from Let's Encrypt. Make sure your A record points to the correct IP and that it's had time to propagate across the web. This takes up to 30 minutes after you add the entry.
+* Firewall blocking ports 80 and 443. Beyond `ufw` and `firewalld` on the system, make sure there aren't any additional firewalls set up in your VPS provider or home network that could be blocking the incoming ports.
+* Nextcloud can't connect to the database. Make sure the MYSQL_HOST value matches the container name of the MariaDB container. Make sure the same is true for the database username and password.
+
+## Next steps
+
+Now that we have a server set up and working, let's make sure we never have to do it by hand again! In Part 3 of the series, I'll go over how you can automate the entire configuration with an Ansible playbook. Not only can you re-use that playbook to spin up multiple servers or re-deploy on a new hosting provider, it's also documentation that writes itself. 
+
+As always, feel free to leave a comment below with any questions or suggestions. You can also reach me by email or Mastodon. 
+
+Happy hacking!

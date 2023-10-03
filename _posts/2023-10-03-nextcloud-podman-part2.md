@@ -18,7 +18,7 @@ Now that I've established the stack, let's dive in to setting up the Nextcloud a
 * [Create a Podman Pod](#create-a-pod)
 * [Create the containers](#create-the-containers)
 * [Generate Systemd service files](#generate-systemd-files)
-* [Moving to production](#move-to-production)
+* [Move to production](#move-to-production)
 * [Troubleshooting](#troubleshooting)
 
 ### Requirements
@@ -40,12 +40,12 @@ Podman "pods" are logical groupings of containers that depend on one another. Th
 For a much more thorough explanation on what pods are and how they work, check out this [excellent post](https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods) on the Red Hat developer blog.
 
 **Rootless Gotcha #1**  
-In most Linux distributions, unprivileged applications are not allowed to bind themselves to ports below 1024. To fix this, we'll need to update a system parameter via `sysctl`:
+In most Linux distributions, unprivileged applications are not allowed to bind themselves to ports below 1024. Before we get started, we'll need to update a system parameter via `sysctl` to solve this issue:
 ``` shell
 sudo sysctl net.ipv4.ip_unprivileged_port_start=80
 ```
 
-To make the change persist on reboot, create a new file under `/etc/sysctl.d/` named `99-podman.conf` and past the line `net.ipv4.ip_unprivileged_port_start=80`. You'll need to use `sudo` privileges for this.
+To make the change persist on reboot, create a new file under `/etc/sysctl.d/` named `99-podman.conf` and paste the line `net.ipv4.ip_unprivileged_port_start=80`. You'll need to use `sudo` privileges for this.
 
 After that's done, let's create a new pod called "nextcloud".
 
@@ -374,7 +374,7 @@ your.server.com {
 
 The above configuration will use Caddy's built-in automatic HTTPS to pull a certificate from Let's Encrypt. It also blocks web access to certain directories in your Nextcloud folder and adds redirects for Nextcloud's CalDAV and CardDAV endpoints. 
 
-### Mariadb optimizations
+### MariaDB optimizations
 
 After running this setup in production for a couple months and going through my first Nextcloud version upgrade, I had issues with Nextcloud losing access to the database during the upgrade process. I did some research and found this [helpful article](https://docs.nextcloud.com/server/latest/admin_manual/configuration_database/linux_database_configuration.html) in Nextcloud's documentation which points to some MariaDB options we can use to fix these issues.
 
@@ -567,7 +567,7 @@ I recommend navigating to **Administration Settings -> Overview** and reading th
 
 If the Nextcloud page isn't loading as expected or you're getting an error when launching your service, the container output logs are your friends! Run `podman ps` to see if your containers are running. If they are, use `podman logs <container name>` to see the latest output from each container. It's usually pretty easy to spot red flags there.
 
-If the containers aren't running, use `sudo journalctl -xe` to check the output of each service. You may have to scroll up a bit to get useful information, since services will often try to restart multiple times after an error and fill up the output in process. Make sure you scroll up past the messages that say "service start request repeated too quickly" and try to find the first messages shown from each container's service.
+If the containers aren't running, use `sudo journalctl -xe` to check the output of each service. You may have to scroll up a bit to get useful information, since services will often try to restart multiple times after an error and fill up the output. Make sure you scroll up past the messages that say "service start request repeated too quickly" and try to find the first messages shown from each container's service.
 
 **Common problems**
 * Directory or file referenced in the `*.service` file doesn't exist or is in the wrong location (your container directories and Caddyfile). Make sure the paths are consistent in all your files.
@@ -582,7 +582,7 @@ If the containers aren't running, use `sudo journalctl -xe` to check the output 
 
 ## Next steps
 
-Now that we have a working server, let's make sure we never have to do it by hand again! In Part 3 of the series, I'll go over how you can automate the entire configuration with an [Ansible playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html). Not only can you re-use that playbook to spin up multiple servers or re-deploy on a new hosting provider, it's also documentation that writes itself. 
+Now that we have a working server, let's make sure we never have to do it by hand again! In Part 3 of the series, I'll go over how you can automate the entire configuration with an [Ansible playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html). Not only can you re-use that playbook to spin up multiple servers or re-deploy on a new hosting provider, it also acts as documentation that writes itself. 
 
 As always, feel free to leave a comment below with any questions or suggestions. You can also reach me by [email](mailto:blog@rayagainstthemachine.net) or [Mastodon](https://fosstodon.org/@skoobasteeve). 
 

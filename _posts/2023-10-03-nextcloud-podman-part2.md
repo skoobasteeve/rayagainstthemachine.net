@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "Building a Reproducible Nextcloud Server, Part two: Podman containers and Systemd units"
-date:   2023-08-28 10:00:00
+date:   2023-10-03 08:00:00
 excerpt: "In the second installment of my Nextcloud server rebuild, we'll get our containers set up with Podman and deploy them on a public-facing server."
 categories: [Self-Hosting, Linux Administration]
 tags: linux nextcloud podman docker container vps

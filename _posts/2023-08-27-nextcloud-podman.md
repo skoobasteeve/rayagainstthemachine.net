@@ -69,7 +69,7 @@ Enter [Ansible](https://www.ansible.com/). Anything you could possibly think to 
 
 This post talked about the ideas and goals I had going into this project, and in Part 2 I'll talk about the details of the implementation, and how sometimes things seem a lot easier in a blog post than they turn out to be in reality! If you're interested in the nitty-gritty of how these tools work for a project like this, stay tuned for the next post in the series.
 
-[*Link to Part two*]({% link _posts/2023-08-28-nextcloud-podman-part2.md %})
+[*Link to Part two*]({% link _posts/2023-10-03-nextcloud-podman-part2.md %})
 
 
 

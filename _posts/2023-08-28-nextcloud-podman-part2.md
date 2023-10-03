@@ -472,23 +472,23 @@ Restart=on-failure
 TimeoutStopSec=70
 ExecStartPre=/bin/rm -f %t/%n.ctr-id
 ExecStart=/usr/bin/podman run \
-	--cidfile=%t/%n.ctr-id \
-	--cgroups=no-conmon \
-	--rm \
-	--pod-id-file %t/pod-nextcloud-pod.pod-id \
-	--sdnotify=conmon \
-	--replace \
-	--detach \
-	--env MYSQL_DATABASE=${MYSQL_DATABASE} \
-	--env MYSQL_USER=${MYSQL_USER} \
-	--env MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-	--env MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} \
-	--volume %h/.podman/nextcloud/mariadb:/var/lib/mysql:z \
-	--name mariadb docker.io/library/mariadb:11 \
-	--transaction-isolation=READ-COMMITTED \
+    --cidfile=%t/%n.ctr-id \
+    --cgroups=no-conmon \
+    --rm \
+    --pod-id-file %t/pod-nextcloud-pod.pod-id \
+    --sdnotify=conmon \
+    --replace \
+    --detach \
+    --env MYSQL_DATABASE=${MYSQL_DATABASE} \
+    --env MYSQL_USER=${MYSQL_USER} \
+    --env MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+    --env MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} \
+    --volume %h/.podman/nextcloud/mariadb:/var/lib/mysql:z \
+    --name mariadb docker.io/library/mariadb:11 \
+    --transaction-isolation=READ-COMMITTED \
     --log-bin=binlog \
     --binlog-format=ROW \
-	--max_allowed_packet=256000000
+    --max_allowed_packet=256000000
 ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
 ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
 Type=notify

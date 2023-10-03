@@ -43,9 +43,10 @@ For a much more thorough explanation on what pods are and how they work, check o
 In most Linux distributions, unprivileged applications are not allowed to bind themselves to ports below 1024. To fix this, we'll need to update a system parameter via `sysctl`:
 ``` shell
 sudo sysctl net.ipv4.ip_unprivileged_port_start=80
-sudo echo "net.ipv4.ip_unprivileged_port_start=80" > /etc/sysctl.d/99-podman.conf
 ```
-\
+
+To make the change persist on reboot, create a new file under `/etc/sysctl.d/` named `99-podman.conf` and past the line `net.ipv4.ip_unprivileged_port_start=80`. You'll need to use `sudo` privileges for this.
+
 After that's done, let's create a new pod called "nextcloud".
 
 ``` shell
@@ -527,8 +528,10 @@ If you haven't done so already, make the change to update the unprvivileged port
 
 ``` shell
 sudo sysctl net.ipv4.ip_unprivileged_port_start=80
-sudo echo "net.ipv4.ip_unprivileged_port_start=80" > /etc/sysctl.d/99-podman.conf
 ```
+
+Don't forget to create the file at `/etc/sysctl.d/99-podman.conf` so it persists on reboot!
+
 \
 Finally, start the Nextcloud service!
 
@@ -536,7 +539,7 @@ Finally, start the Nextcloud service!
 systemctl --user start pod-nextcloud
 ```
 \
-Verify everything is running with `podman ps`.
+On the first run, it may take a few mintues for Podman to pull down the container images. Check the output of `podman ps` and you should see the containers appearing there one after the other, eventually showing all three.
 
 ``` shell
 CONTAINER ID  IMAGE                                    COMMAND               CREATED         STATUS         PORTS                                     NAMES
@@ -547,6 +550,18 @@ b29486a99286  docker.io/library/caddy:2           caddy run --confi...  4 minute
 ```
 \
 At this point you should have rootless Nextcloud accessible at your FQDN on the public internet with HTTPS!
+
+![nextcloud-podman02](/assets/images/screenshots/nextcloud-podman02.png){:class="img-responsive"}
+
+Walk through the first-time setup of Nextcloud to create your admin account and install apps.
+
+![nextcloud-podman03](/assets/images/screenshots/nextcloud-podman03.png){:class="img-responsive"}
+
+![nextcloud-podman04](/assets/images/screenshots/nextcloud-podman04.png){:class="img-responsive"}
+
+I recommend navigating to **Administration Settings -> Overview** and reading the "Security & setup warnings". The Nextcloud app always has a few recommendations for fixes and changes to the configuration, with documentation to back it up.
+
+![nextcloud-podman05](/assets/images/screenshots/nextcloud-podman05.png){:class="img-responsive"}
 
 ## Troubleshooting
 

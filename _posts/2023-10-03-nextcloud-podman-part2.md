@@ -584,6 +584,6 @@ If the containers aren't running, use `sudo journalctl -xe` to check the output 
 
 Now that we have a working server, let's make sure we never have to do it by hand again! In Part 3 of the series, I'll go over how you can automate the entire configuration with an [Ansible playbook](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html). Not only can you re-use that playbook to spin up multiple servers or re-deploy on a new hosting provider, it also acts as documentation that writes itself. 
 
-As always, feel free to leave a comment below with any questions or suggestions. You can also reach me by [email](mailto:blog@rayagainstthemachine.net) or [Mastodon](https://fosstodon.org/@skoobasteeve). 
+As always, feel free to leave a comment below with any questions or suggestions. You can also reach me by [email](mailto:ray@rayagainstthemachine.net) or [Mastodon](https://fosstodon.org/@skoobasteeve). 
 
 Happy hacking!

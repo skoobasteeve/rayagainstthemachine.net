@@ -22,7 +22,7 @@ Not only does podman auto-update save you all these steps, it will also automati
 
 ## Requirements
 * Podman installed
-* Containers managed with systemd
+* Containers [managed with systemd](https://docs.podman.io/en/stable/markdown/podman-generate-systemd.1.html)
 * Containers you want to update must use the `--label "io.containers.autoupdate=registry"` run option
 
 ## Instructions
@@ -89,7 +89,7 @@ pod-nextcloud-pod.service  71e48b691447 (mariadb)        docker.io/library/maria
 pod-nextcloud-pod.service  9ed555fecdfa (caddy)          docker.io/library/caddy             registry    true
 ```
 \
-During this process, the were restarted automatically with the latest image. You can verify this with `podman ps`.
+During this process, the containers were restarted automatically with the latest image. You can verify this with `podman ps`.
 
 ``` shell
 podman ps
